@@ -58,4 +58,11 @@ class FutureExample{
 
 /*
 submit takes a callable.
+
+When to use Fixed Thread pool, Cached Thread pool, Scheduled Thread pool
+
+1. Fixed Thread Pool -> When we know we have N number of threads and there is a predictable outcome.
+2. Cached Thread Pool -> Created new Thread as needed, but will reuse previously constructed threads when they are available.
+(wait for 60 seconds before terminating idle threads)
+3. Scheduled Thread Pool -> Supports delayed and repeated task execution.
 */
