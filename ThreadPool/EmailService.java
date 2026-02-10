@@ -7,7 +7,7 @@ public class EmailService {
 
     public static void sendEmail(String recipient){
 
-        executor.execute(()->{
+        executor.execute(()->{ // Runnable always has a void function.
             System.out.println("Sending email to the "+ recipient + " on "+ Thread.currentThread().getName());
 
             try{
@@ -35,4 +35,27 @@ It executes Threads in queues ( bunch of threads, say 10)
 
 Uses newFixedThreadPool()
 
+*/
+
+class FutureExample{
+    public static void main(String args[]) throws InterruptedException, ExecutionException{
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        Future<Integer> future = executor.submit(()->{
+            //callable -> has a return type
+            Thread.sleep(1000);
+            return 42;
+        });
+
+        System.out.println("Doing other work....");
+
+        Integer result = future.get();
+        System.out.println("Result: "+ result);
+
+        executor.shutdown();
+    }
+}
+
+/*
+submit takes a callable.
 */
