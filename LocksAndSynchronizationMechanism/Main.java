@@ -85,6 +85,41 @@ class ExpiringReentrantLock {
     }
 }
 
+// this try lock prevents the thread to get stuck forever.
+class TicketBookingTryLock{
+    private int availableSeats = 1;
+    private final ReentrantLock lock = new ReentrantLock();
+
+    public void bookTicket(String user) throws InterruptedException{
+        System.out.println(user+" is trying to book the ticket");
+
+        boolean lockAcquired = false;
+
+        try{
+            lockAcquired = lock.tryLock(2, TimeUnit.MILLISECONDS);
+
+            if(lockAcquired){
+                System.out.println(user+" acquired lock");
+                if(availableSeats > 0){
+                    System.out.println(user+" successfully booked the ticket");
+                    availableSeats --;
+                }else{
+                    System.out.println(user+" coulr not book the ticket. No seat is left");
+                }
+            }else{
+                System.out.println(user+" could not acquire look. Try again later.");
+            }
+        }catch(Error e){
+            System.out.println(e.getMessage());
+        }finally{
+            if(lockAcquired){
+                System.out.println(user+" is releasing the lock");
+                lock.unlock();
+            }
+        }
+    }
+}
+
 public class Main {
     public static void main(String args[]){
 
