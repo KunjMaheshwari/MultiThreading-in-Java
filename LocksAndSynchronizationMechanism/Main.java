@@ -2,6 +2,7 @@ package LocksAndSynchronizationMechanism;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -147,6 +148,34 @@ class StockData {
         } finally {
             lock.readLock().unlock();
         }
+    }
+}
+
+// Semaphores -> Helpes us in limiting the number of threads accessing a shared
+// piece of resource.
+
+class Account {
+    private final Semaphore deviceSlots;
+
+    public Account(int maxDevice) {
+        this.deviceSlots = new Semaphore(maxDevice);
+    }
+
+    public boolean login(String user) {
+        System.out.println(user + " is trying to login");
+
+        if (deviceSlots.tryAcquire()) {
+            System.out.println(user + " successfully logged in");
+            return true;
+        } else {
+            System.out.println(user + " denied login");
+            return false;
+        }
+    }
+
+    public void logout(String user) {
+        System.out.println(user + " logged out successfully");
+        deviceSlots.release();
     }
 }
 
