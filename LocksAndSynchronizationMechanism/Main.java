@@ -3,7 +3,9 @@ package LocksAndSynchronizationMechanism;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /*
 
@@ -86,42 +88,70 @@ class ExpiringReentrantLock {
 }
 
 // this try lock prevents the thread to get stuck forever.
-class TicketBookingTryLock{
+class TicketBookingTryLock {
     private int availableSeats = 1;
     private final ReentrantLock lock = new ReentrantLock();
 
-    public void bookTicket(String user) throws InterruptedException{
-        System.out.println(user+" is trying to book the ticket");
+    public void bookTicket(String user) throws InterruptedException {
+        System.out.println(user + " is trying to book the ticket");
 
         boolean lockAcquired = false;
 
-        try{
+        try {
             lockAcquired = lock.tryLock(2, TimeUnit.MILLISECONDS);
 
-            if(lockAcquired){
-                System.out.println(user+" acquired lock");
-                if(availableSeats > 0){
-                    System.out.println(user+" successfully booked the ticket");
-                    availableSeats --;
-                }else{
-                    System.out.println(user+" coulr not book the ticket. No seat is left");
+            if (lockAcquired) {
+                System.out.println(user + " acquired lock");
+                if (availableSeats > 0) {
+                    System.out.println(user + " successfully booked the ticket");
+                    availableSeats--;
+                } else {
+                    System.out.println(user + " coulr not book the ticket. No seat is left");
                 }
-            }else{
-                System.out.println(user+" could not acquire look. Try again later.");
+            } else {
+                System.out.println(user + " could not acquire look. Try again later.");
             }
-        }catch(Error e){
+        } catch (Error e) {
             System.out.println(e.getMessage());
-        }finally{
-            if(lockAcquired){
-                System.out.println(user+" is releasing the lock");
+        } finally {
+            if (lockAcquired) {
+                System.out.println(user + " is releasing the lock");
                 lock.unlock();
             }
         }
     }
 }
 
+class StockData {
+    private Double price = 100.0;
+    private final ReadWriteLock lock = new ReentrantReadWriteLock();
+
+    // when thread is writing , no one can read and write, everyone is blocked.
+    public void updatePrice(double newPrice) {
+        lock.writeLock().lock();
+
+        try {
+            System.out.println(Thread.currentThread().getName() + " updating price to " + newPrice);
+            price = newPrice;
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    // when i am reading, no one is blocked.
+    public void readPrice() {
+        lock.readLock().lock();
+
+        try {
+            System.out.println(Thread.currentThread().getName() + " read price: " + price);
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+}
+
 public class Main {
-    public static void main(String args[]){
+    public static void main(String args[]) {
 
     }
 }
